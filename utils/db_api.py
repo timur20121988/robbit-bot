@@ -1,7 +1,9 @@
 import aiosqlite
 import datetime
+import os
 
-DB_PATH = "data/bot_database.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "bot_database.db")
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:

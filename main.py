@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import os
+from aiohttp import web
 from aiogram import Bot, Dispatcher
 from config import BOT_TOKEN
 from handlers import admin, user
@@ -29,9 +31,26 @@ async def daily_reminder(bot: Bot):
         except Exception:
             pass
 
+# --- Keep-alive web server for Render ---
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
+async def run_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    port = int(os.environ.get("PORT", 10000))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"Web server started on port {port}")
+
 async def main():
     # Initialize DB
     await init_db()
+
+    # Start web server (for Render keep-alive)
+    await run_web_server()
     
     # Initialize Bot and Dispatcher
     bot = Bot(token=BOT_TOKEN)
